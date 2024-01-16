@@ -28,17 +28,21 @@ class SceneMain extends Phaser.Scene {
         this.gameCenterY = game.config.height*0.5;
         
         this.player = this.physics.add.image(Math.floor(game.config.width*0.2),Math.floor(game.config.height/2),"testPaddle");
+        this.player.setOrigin(0.5,0.5);
         this.player.setImmovable();
         this.player.body.allowGravity = false;
 //body.allowGravity = false
         this.enemy = this.physics.add.image(Math.floor(game.config.width*0.8),Math.floor(game.config.height/2),"badPaddle");
         this.enemy.setImmovable();
         this.enemy.setVelocity(0,200);
+        this.enemy.setOrigin(0.5,0.5);
         this.enemy.body.allowGravity = false;
 
         this.ball = this.physics.add.image(Math.floor(game.config.width*0.5),Math.floor(game.config.height*0.5),"ball");
         this.ball.setVelocity(-200,0);
         this.ball.body.allowGravity = false;
+        this.ball.setCollideWorldBounds(true);
+        this.ball.body.bounce.set(1,1);
 
         //set colliders
         this.physics.add.collider(this.ball,this.player,this.ballCollision, null, this);
@@ -48,25 +52,54 @@ class SceneMain extends Phaser.Scene {
 
     }
     update() {
-       //move player paddle to position
 
-       if(this.player.x < this.mouseX){
-            this.player.setVelocityX(this.gameVelocity);
-       }else if(this.player.x > this.mouseX){
-            this.player.setVelocityX(-this.gameVelocity);
-       }
-       if(this.player.y < this.mouseY){
-            this.player.setVelocityY(this.gameVelocity);
-       }else if(this.player.y > this.mouseY){
-            this.player.setVelocityY(-this.gameVelocity);
-       }
+        var enemyDiff = Math.abs(this.enemy.y - this.ball.y);
+
+        //reset game
+        if(this.ball.x < 0){
+            //enemy wins
+            this.resetGame();
+        }
+        else if(this.ball.x > game.config.width){
+            //player wins
+            this.resetGame();
+        }
+        
+        if(this.enemy.y > this.ball.y && enemyDiff > 100){
+            this.enemy.setVelocityY(-this.gameVelocity);
+        }
+        else if(this.enemy.y < this.ball.y && enemyDiff > 100){
+            this.enemy.setVelocityY(this.gameVelocity);
+        }
+
     }
     handleMove(pointer){
         this.mouseX = pointer.x;
         this.mouseY = pointer.y;
+        this.physics.moveTo(this.player,this.mouseX,this.mouseY,this.gameVelocity);
+        
+    
     }
     ballCollision(ball, paddle){
-        this.gameVelocity = 200;
-        this.ball.setVelocity(0,-this.gameVelocity); //toggle direction
+        var difference;
+
+        if(ball.y < paddle.y){
+            difference = paddle.y - ball.y;
+            ball.body.setVelocityY(-10*difference);
+        }
+        else if (ball.y > paddle.y){
+            difference = ball.y - paddle.y;
+            ball.body.setVelocityY(-10*difference);
+        }
+        else{
+            ball.body.velocity.y= 2 + Math.random() * 8;
+        }
+    }
+    resetGame(){
+        this.player.x = 0;
+
+
+        this.ball.x = 0;
+        this.ball.y = game.config.height/2;
     }
 }
