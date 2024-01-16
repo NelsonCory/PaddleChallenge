@@ -16,7 +16,7 @@ class SceneMain extends Phaser.Scene {
         controller = new Controller();
         this.mouseX;
         this.mouseY;
-        this.gameVelocity = 200;
+        this.gameVelocity = 400;
 
         //define our objects
         this.sb = new ScoreBox({scene:this});
@@ -37,6 +37,7 @@ class SceneMain extends Phaser.Scene {
         this.enemy.setVelocity(0,200);
         this.enemy.setOrigin(0.5,0.5);
         this.enemy.body.allowGravity = false;
+        this.enemy.setCollideWorldBounds(true);
 
         this.ball = this.physics.add.image(Math.floor(game.config.width*0.5),Math.floor(game.config.height*0.5),"ball");
         this.ball.setVelocity(-200,0);
@@ -56,13 +57,14 @@ class SceneMain extends Phaser.Scene {
         var enemyDiff = Math.abs(this.enemy.y - this.ball.y);
 
         //reset game
-        if(this.ball.x < 0){
+        if(this.ball.x < 50){
             //enemy wins
             this.resetGame();
         }
-        else if(this.ball.x > game.config.width){
+        else if(this.ball.x > game.config.width - 50){
             //player wins
             this.resetGame();
+            emitter.emit(G.UP_POINTS,1);
         }
         
         if(this.enemy.y > this.ball.y && enemyDiff > 100){
@@ -96,10 +98,12 @@ class SceneMain extends Phaser.Scene {
         }
     }
     resetGame(){
-        this.player.x = 0;
+        console.log("game reset");
+        this.player.x = Math.floor(game.config.width*0.2);
+        this.player.y = Math.floor(game.config.height*0.2);
+        
 
-
-        this.ball.x = 0;
+        this.ball.x =  game.config.width/2;;
         this.ball.y = game.config.height/2;
     }
 }
