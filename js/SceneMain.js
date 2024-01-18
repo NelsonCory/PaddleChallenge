@@ -27,58 +27,55 @@ class SceneMain extends Phaser.Scene {
         this.gameCenterX = game.config.width*0.5;
         this.gameCenterY = game.config.height*0.5;
         
-        this.player = this.physics.add.image(Math.floor(game.config.width*0.2),Math.floor(game.config.height/2),"testPaddle");
-        this.player.setOrigin(0.5,0.5);
-        this.player.setImmovable();
-        this.player.body.allowGravity = false;
+        //this.player = this.physics.add.image(Math.floor(game.config.width*0.2),Math.floor(game.config.height/2),"testPaddle");
+        this.player = new Player({scene:this,key:"testPaddle",startX:Math.floor(game.config.width*0.2),startY:Math.floor(game.config.height/2)});
+
 //body.allowGravity = false
         this.enemy = this.physics.add.image(Math.floor(game.config.width*0.8),Math.floor(game.config.height/2),"badPaddle");
         this.enemy.setImmovable();
-        this.enemy.setVelocity(0,200);
+        this.enemy.setVelocity(0,0);
         this.enemy.setOrigin(0.5,0.5);
         this.enemy.body.allowGravity = false;
         this.enemy.setCollideWorldBounds(true);
 
-        this.ball = this.physics.add.image(Math.floor(game.config.width*0.5),Math.floor(game.config.height*0.5),"ball");
-        this.ball.setVelocity(-200,0);
-        this.ball.body.allowGravity = false;
-        this.ball.setCollideWorldBounds(true);
-        this.ball.body.bounce.set(1,1);
+        this.ball = new Ball({scene:this,key:"ball",startX:Math.floor(game.config.width*0.5),startY:Math.floor(game.config.height/2)})
 
         //set colliders
-        this.physics.add.collider(this.ball,this.player,this.ballCollision, null, this);
-        this.physics.add.collider(this.ball,this.enemy,this.ballCollision, null, this);
+        this.physics.add.collider(this.ball.pBody,this.player.player,this.ballCollision, null, this);
+        this.physics.add.collider(this.ball.pBody,this.enemy,this.ballCollision, null, this);
 
         this.input.on("pointerdown",this.handleMove,this);
 
     }
     update() {
 
-        var enemyDiff = Math.abs(this.enemy.y - this.ball.y);
+        var enemyDiff = Math.abs(this.enemy.y - this.ball.pBody.y);
 
         //reset game
         if(this.ball.x < 50){
             //enemy wins
             this.resetGame();
         }
-        else if(this.ball.x > game.config.width - 50){
+        else if(this.ball.pBody.x > game.config.width - 50){
             //player wins
             this.resetGame();
             emitter.emit(G.UP_POINTS,1);
         }
         
-        if(this.enemy.y > this.ball.y && enemyDiff > 100){
+        if(this.enemy.y > this.ball.pBody.y && enemyDiff > 100){
             this.enemy.setVelocityY(-this.gameVelocity);
+            console.log("going up");
         }
-        else if(this.enemy.y < this.ball.y && enemyDiff > 100){
+        else if(this.enemy.y < this.ball.pBody.y && enemyDiff > 100){
             this.enemy.setVelocityY(this.gameVelocity);
+            console.log("going down");
         }
 
     }
     handleMove(pointer){
         this.mouseX = pointer.x;
         this.mouseY = pointer.y;
-        this.physics.moveTo(this.player,this.mouseX,this.mouseY,this.gameVelocity);
+        this.physics.moveTo(this.player.player,this.mouseX,this.mouseY,this.gameVelocity);
         
     
     }
@@ -99,11 +96,11 @@ class SceneMain extends Phaser.Scene {
     }
     resetGame(){
         console.log("game reset");
-        this.player.x = Math.floor(game.config.width*0.2);
-        this.player.y = Math.floor(game.config.height*0.2);
+        this.player.player.x = Math.floor(game.config.width*0.2);
+        this.player.player.y = Math.floor(game.config.height*0.2);
         
 
-        this.ball.x =  game.config.width/2;;
-        this.ball.y = game.config.height/2;
+        this.ball.pBody.x =  game.config.width/2;;
+        this.ball.pBody.y = game.config.height/2;
     }
 }
