@@ -10,6 +10,7 @@ class Player {
             this.player.setOrigin(0.5,0.5);
             this.player.setImmovable();
             this.player.body.allowGravity = false;
+            this.player.setCollideWorldBounds(true);
 
     }
 

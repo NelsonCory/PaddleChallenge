@@ -12,4 +12,9 @@ class Model
     get score(){
         return this._score;
     }
+
+    // when user selects options in menu, this hold data for constructing the player's paddle during the game.
+    
+
+
 }
